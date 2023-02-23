@@ -26,6 +26,11 @@ public class ChatEntity  extends BaseEntity {
 	//@Column(nullable = false)
     private String storeCd;
     
+    private String messageType;
+    
+    @Column(nullable = false)
+    private Long roomCd;
+
     @Column(nullable = false)
     private String userCd;
     
@@ -33,8 +38,5 @@ public class ChatEntity  extends BaseEntity {
 
     private String message;
     
-    private String messageType;
-    
-    @Column(nullable = false)
-    private Long roomCd;
+    private String domain;
 }

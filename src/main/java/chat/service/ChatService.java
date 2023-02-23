@@ -16,8 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -32,6 +34,7 @@ import chat.repository.ChatRoomMemberRepository;
 import chat.repository.ChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -89,13 +92,10 @@ public class ChatService {
         });
         //채팅 로그를 저장한다.
         chatSave(
-    		ChatEntity.builder()
-    			.roomCd(((ChatMessage)chatMessage).getRoomCd())
-    			.userCd(((ChatMessage)chatMessage).getUserCd())
-    			.message(((ChatMessage)chatMessage).getMessage())
-    			.messageType(((ChatMessage)chatMessage).getMessageType().toString())
-    			.build()
+    		((ChatMessage)chatMessage).toEntity()
 		);
+        
+        requestClient(((ChatMessage)chatMessage).getDomain(),((ChatMessage)chatMessage));
     }
 
     //방을 생성하는 서비스
@@ -254,6 +254,27 @@ public class ChatService {
         }
     }
     
+    public void requestClient(String url, ChatMessage chatMessage) {
+    	DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(url);
+    	factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.VALUES_ONLY);
+    		
+    	WebClient webClient = WebClient.builder()
+    			.uriBuilderFactory(factory)
+				.baseUrl(url)
+				.build();
+    	String response = webClient.post()
+                .uri(uriBuilder -> uriBuilder
+                		.queryParam("roomCd", chatMessage.getRoomCd())
+                		.queryParam("userCd", chatMessage.getUserCd())
+                		.queryParam("toUserCd", chatMessage.getToUserCd())
+                		.queryParam("message", chatMessage.getMessage())
+                		.build())
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+        System.out.println("응답결과 : "+response);
+    }
+    
     //[CRUD]chatRoom
     
     //채팅룸 변경 사항 저장하는 메서드
@@ -302,7 +323,6 @@ public class ChatService {
     public ChatEntity chatSave(ChatEntity chatEntity) {
     	return chatRepository.save(chatEntity);
     }
-    
     //roomCd를 통해 해당 방의 채팅 기록을 불러오는 메서드
     public List<ChatEntity> chatFindByRoomCd(Long roomCd){
     	return chatRepository.findByRoomCd(roomCd);
