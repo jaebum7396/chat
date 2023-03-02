@@ -48,12 +48,12 @@ public class MyWebSocketHandler extends TextWebSocketHandler {
         log.info(session + " 클라이언트 접속 해제");
         list.remove(session);
         ChatRoomMemberEntity crme = chatService.chatRoomMemberFindBySession(session.getId()).orElseGet(() -> ChatRoomMemberEntity.builder().build()); //현재 방 나간 멤버 정보
-        chatService.exitRoom(crme.getUserCd(), crme.getRoomCd());
-        List<ChatRoomMemberEntity> crmeArr = chatService.chatRoomMemberFindByRoomCdAndConnectYn(crme.getRoomCd(), 1);
+        chatService.exitRoom(crme.getUserCd(), crme.getChannelId());
+        List<ChatRoomMemberEntity> crmeArr = chatService.chatRoomMemberFindByChannelIdAndConnectYn(crme.getChannelId(), 1);
         
         if(crmeArr.size()==0) {
-        	ChannelEntity cre = chatService.chatRoomFindByRoomCd(crme.getRoomCd()).get();
-        	ChannelEntity creUpdate = ChannelEntity.builder().roomCd(cre.getRoomCd()).roomNm(cre.getRoomNm()).deleteYn(-1).build();
+        	ChannelEntity cre = chatService.chatRoomFindByChannelId(crme.getChannelId()).get();
+        	ChannelEntity creUpdate = ChannelEntity.builder().channelId(cre.getChannelId()).channelName(cre.getChannelName()).deleteYn(-1).build();
         	chatService.chatRoomSave(creUpdate);
         }
         log.info("전체세션 : " +list.toString());

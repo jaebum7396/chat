@@ -12,5 +12,5 @@ import chat.model.ChannelEntity;
 @Repository
 public interface ChatRepository extends JpaRepository<ChatEntity,String> {
     List<ChatEntity> findAll();
-    List<ChatEntity> findByRoomCd(Long roomCd);
+    List<ChatEntity> findByChannelId(Long ChannelId);
 }

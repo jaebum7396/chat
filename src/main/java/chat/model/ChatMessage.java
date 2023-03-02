@@ -2,6 +2,8 @@ package chat.model;
 
 import java.net.URI;
 
+import javax.persistence.Column;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,7 +15,8 @@ public class ChatMessage {
     }
     private MessageType messageType;
     
-    private Long roomCd;
+    @Column(nullable = false, name = "CHANNEL_ID")
+    private Long channelId;
     
     private String userCd;
 
@@ -26,7 +29,7 @@ public class ChatMessage {
     public ChatEntity toEntity(){
     	return ChatEntity.builder()
 			.messageType(messageType.toString())
-			.roomCd(roomCd)
+			.channelId(channelId)
 			.userCd(userCd)
 			.toUserCd(toUserCd)
 			.message(message)
@@ -35,7 +38,7 @@ public class ChatMessage {
     }
     //public URI toUri() {
     //    return uriBuilder
-    //    .queryParam("roomCd", roomCd)
+    //    .queryParam("ChannelId", ChannelId)
     //    .queryParam("userCd", userCd)
     //    .queryParam("toUserCd", toUserCd)
     //    .queryParam("message", message)

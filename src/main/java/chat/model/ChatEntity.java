@@ -28,8 +28,8 @@ public class ChatEntity  extends BaseEntity {
     
     private String messageType;
     
-    @Column(nullable = false)
-    private Long roomCd;
+    @Column(nullable = false, name = "CHANNEL_ID")
+    private Long channelId;
 
     @Column(nullable = false)
     private String userCd;

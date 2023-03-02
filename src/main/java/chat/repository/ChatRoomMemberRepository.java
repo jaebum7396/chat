@@ -11,8 +11,8 @@ import chat.model.ChatRoomMemberId;
 
 @Repository
 public interface ChatRoomMemberRepository extends JpaRepository<ChatRoomMemberEntity, ChatRoomMemberId> {
-	List<ChatRoomMemberEntity> findByRoomCdAndConnectYn(Long roomCd, int ConnectYn);
-	List<ChatRoomMemberEntity> findByRoomCdAndUserCdAndConnectYn(Long roomCd, String userCd, int ConnectYn);
+	List<ChatRoomMemberEntity> findByChannelIdAndConnectYn(Long ChannelId, int ConnectYn);
+	List<ChatRoomMemberEntity> findByChannelIdAndUserCdAndConnectYn(Long ChannelId, String userCd, int ConnectYn);
 	Optional<ChatRoomMemberEntity> findBySession(String session);
     List<ChatRoomMemberEntity> findAll();
 }

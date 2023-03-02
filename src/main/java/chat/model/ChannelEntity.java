@@ -21,9 +21,10 @@ import lombok.experimental.SuperBuilder;
 public class ChannelEntity extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long roomCd;
-    
-    private String roomNm;
+    @Column(name = "CHANNEL_ID")
+    private Long channelId;
+    @Column(name = "CHANNEL_NAME")
+    private String channelName;
     
     private String sessionId;
 }

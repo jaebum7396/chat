@@ -17,5 +17,5 @@ import lombok.NoArgsConstructor;
 public class ChatRoomMemberId implements Serializable{
     private String userCd;
     
-    private Long roomCd;
+    private Long channelId;
 }

@@ -11,7 +11,7 @@ import chat.model.ChannelEntity;
 @Repository
 public interface ChatRoomRepository extends JpaRepository<ChannelEntity,String> {
 	ChannelEntity save(ChannelEntity ChannelEntity);
-    Optional<ChannelEntity> findByRoomCd(Long roomCd);
+    Optional<ChannelEntity> findByChannelId(Long ChannelId);
     List<ChannelEntity> findByDeleteYn(int deleteYn);
     List<ChannelEntity> findAll();
 }

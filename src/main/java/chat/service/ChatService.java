@@ -1,17 +1,12 @@
 package chat.service;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.annotation.PostConstruct;
-
+import chat.model.*;
+import chat.repository.ChatRepository;
+import chat.repository.ChatRoomMemberRepository;
+import chat.repository.ChatRoomRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,19 +17,9 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import chat.model.ChannelEntity;
-import chat.model.ChatEntity;
-import chat.model.ChatMessage;
-import chat.model.ChatResponse;
-import chat.model.ChatRoomMemberEntity;
-import chat.model.ChatRoomMemberId;
-import chat.repository.ChatRepository;
-import chat.repository.ChatRoomMemberRepository;
-import chat.repository.ChatRoomRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -59,7 +44,7 @@ public class ChatService {
             sessions.add(session);
             chatRoomMemberSave( 
         		ChatRoomMemberEntity.builder()
-        			.roomCd(chatMessage.getRoomCd())
+        			.channelId(chatMessage.getChannelId())
         			.userCd(chatMessage.getUserCd())
                     .session(session.getId())
                     .connectYn(1)
@@ -79,10 +64,10 @@ public class ChatService {
         	List<ChatRoomMemberEntity> crme = new ArrayList<ChatRoomMemberEntity>();
         	if(!"".equals(chatMessage.getToUserCd())&&chatMessage.getToUserCd()!=null){
         		System.out.println("toUserCd != null");
-        		crme = chatRoomMemberFindByRoomCdAndUserCdAndConnectYn(chatMessage.getRoomCd(), chatMessage.getToUserCd(), 1);
+        		crme = chatRoomMemberFindByChannelIdAndUserCdAndConnectYn(chatMessage.getChannelId(), chatMessage.getToUserCd(), 1);
         	}else {
         		System.out.println("toUserCd == null");
-        		crme = chatRoomMemberFindByRoomCdAndConnectYn(chatMessage.getRoomCd(), 1);
+        		crme = chatRoomMemberFindByChannelIdAndConnectYn(chatMessage.getChannelId(), 1);
         	}
         	if(crme.stream().filter(member -> session.getId().equals(member.getSession())).findAny().isPresent()) {
         		try {
@@ -110,12 +95,12 @@ public class ChatService {
     }
 
     //방을 생성하는 서비스
-    public ResponseEntity createRoom(String roomNm) {
+    public ResponseEntity createRoom(String channelName) {
         ChatResponse chatResponse;
         Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
         try {
             String randomId = UUID.randomUUID().toString();
-            ChannelEntity channelEntity = ChannelEntity.builder().roomNm(roomNm).sessionId(randomId).deleteYn(-1).build();
+            ChannelEntity channelEntity = ChannelEntity.builder().channelName(channelName).sessionId(randomId).deleteYn(-1).build();
             ChannelEntityArr.add(channelEntity);  
             chatRoomSave(channelEntity);
             
@@ -213,11 +198,11 @@ public class ChatService {
         }
     }
     
-    public ResponseEntity findByRoomCd(Long roomCd) {
+    public ResponseEntity findByChannelId(Long channelId) {
         ChatResponse chatResponse;
         Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
         try {
-        	Optional<ChannelEntity> optChannelEntity = chatRoomFindByRoomCd(roomCd);
+        	Optional<ChannelEntity> optChannelEntity = chatRoomFindByChannelId(channelId);
         	ChannelEntity channelEntity = optChannelEntity.orElseGet(() -> ChannelEntity.builder().build());
     
             resultMap.put("chatRoom", channelEntity);
@@ -238,12 +223,12 @@ public class ChatService {
         }
     }
     
-    //roomCd를 통해 해당 방의 채팅 기록을 불러오는 서비스
-    public ResponseEntity loadRoom(Long roomCd) {
+    //ChannelId를 통해 해당 방의 채팅 기록을 불러오는 서비스
+    public ResponseEntity loadRoom(Long channelId) {
     	ChatResponse chatResponse;
         Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
         try {
-    	 	resultMap.put("chatArr", chatFindByRoomCd(roomCd));
+    	 	resultMap.put("chatArr", chatFindByChannelId(channelId));
     		chatResponse = ChatResponse.builder()
     				.statusCode(HttpStatus.OK.value())
     				.status(HttpStatus.OK)
@@ -261,14 +246,14 @@ public class ChatService {
         }	
     }
     
-    //userCd와 roomCd를 통해 해당 방의 유저를 퇴장시키는 서비스
-    public ResponseEntity exitRoom(String userCd, Long roomCd) {
+    //userCd와 ChannelId를 통해 해당 방의 유저를 퇴장시키는 서비스
+    public ResponseEntity exitRoom(String userCd, Long channelId) {
     	ChatResponse chatResponse;
         Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
         try {
-        	if(chatRoomMemberEntityFindById(userCd, roomCd).isPresent()) {
+        	if(chatRoomMemberEntityFindById(userCd, channelId).isPresent()) {
         		resultMap.put("chatRoomMemberEntity", chatRoomMemberRepository
-        				.save(ChatRoomMemberEntity.builder().roomCd(roomCd).userCd(userCd).connectYn(-1).build()));
+        				.save(ChatRoomMemberEntity.builder().channelId(channelId).userCd(userCd).connectYn(-1).build()));
         		chatResponse = ChatResponse.builder()
         				.statusCode(HttpStatus.OK.value())
         				.status(HttpStatus.OK)
@@ -295,11 +280,11 @@ public class ChatService {
     }
     
     //룸코드를 통해 각 방의 활성멤버들을 찾아 반환하는 서비스
-    public ResponseEntity findActiveMember(Long roomCd) {
+    public ResponseEntity findActiveMember(Long channelId) {
     	ChatResponse chatResponse;
         Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
         try {
-    	 	resultMap.put("chatArr", chatRoomMemberFindByRoomCdAndConnectYn(roomCd,1));
+    	 	resultMap.put("chatArr", chatRoomMemberFindByChannelIdAndConnectYn(channelId,1));
     		chatResponse = ChatResponse.builder()
     				.statusCode(HttpStatus.OK.value())
     				.status(HttpStatus.OK)
@@ -329,7 +314,7 @@ public class ChatService {
     		
     		String uri = UriComponentsBuilder.fromHttpUrl(url)
 				.queryParam("MESSAGE_ID", chatEntity.getMESSAGE_ID())
-    			.queryParam("roomCd", chatEntity.getRoomCd())
+    			.queryParam("ChannelId", chatEntity.getChannelId())
 				.queryParam("userCd", chatEntity.getUserCd())
 				.queryParam("toUserCd", chatEntity.getToUserCd()==null||chatEntity.getToUserCd().equals("") ? "" : chatEntity.getToUserCd())
 				.queryParam("message", chatEntity.getMessage())
@@ -355,8 +340,8 @@ public class ChatService {
     	return chatRoomRepository.save(ChannelEntity);
     }
     //룸코드를 통해 채팅방을 조회하는 메서드 
-    public Optional<ChannelEntity> chatRoomFindByRoomCd(Long roomCd){
-    	return chatRoomRepository.findByRoomCd(roomCd);
+    public Optional<ChannelEntity> chatRoomFindByChannelId(Long channelId){
+    	return chatRoomRepository.findByChannelId(channelId);
     }
     //모든 채팅방을 조회하는 메서드
     public List<ChannelEntity> chatRoomFindAll(){
@@ -373,17 +358,17 @@ public class ChatService {
     public ChatRoomMemberEntity chatRoomMemberSave(ChatRoomMemberEntity chatRoomMemberEntity) {
     	return chatRoomMemberRepository.save(chatRoomMemberEntity);
     }
-    //userCd와 roomCd를 통해 해당하는 유저를 조회하는 메서드
-    public Optional<ChatRoomMemberEntity> chatRoomMemberEntityFindById(String userCd, Long roomCd) {
-    	return chatRoomMemberRepository.findById(ChatRoomMemberId.builder().userCd(userCd).roomCd(roomCd).build());
+    //userCd와 ChannelId를 통해 해당하는 유저를 조회하는 메서드
+    public Optional<ChatRoomMemberEntity> chatRoomMemberEntityFindById(String userCd, Long channelId) {
+    	return chatRoomMemberRepository.findById(ChatRoomMemberId.builder().userCd(userCd).channelId(channelId).build());
     }
-    //roomCd를 통해 현재 방에 들어와있는 유저를 조회하는 메서드
-    public List<ChatRoomMemberEntity> chatRoomMemberFindByRoomCdAndConnectYn(Long roomCd, int connectYn) {
-    	return chatRoomMemberRepository.findByRoomCdAndConnectYn(roomCd, connectYn);
+    //ChannelId를 통해 현재 방에 들어와있는 유저를 조회하는 메서드
+    public List<ChatRoomMemberEntity> chatRoomMemberFindByChannelIdAndConnectYn(Long channelId, int connectYn) {
+    	return chatRoomMemberRepository.findByChannelIdAndConnectYn(channelId, connectYn);
     }
-    //roomCd를 통해 현재 방에 들어와있는 유저를 조회하는 메서드
-    public List<ChatRoomMemberEntity> chatRoomMemberFindByRoomCdAndUserCdAndConnectYn(Long roomCd, String userCd, int connectYn) {
-    	return chatRoomMemberRepository.findByRoomCdAndUserCdAndConnectYn(roomCd, userCd, connectYn);
+    //ChannelId를 통해 현재 방에 들어와있는 유저를 조회하는 메서드
+    public List<ChatRoomMemberEntity> chatRoomMemberFindByChannelIdAndUserCdAndConnectYn(Long channelId, String userCd, int connectYn) {
+    	return chatRoomMemberRepository.findByChannelIdAndUserCdAndConnectYn(channelId, userCd, connectYn);
     }
     //session을 통해 유저를 조회하는 메서드	
     public Optional<ChatRoomMemberEntity> chatRoomMemberFindBySession(String session) {
@@ -396,9 +381,9 @@ public class ChatService {
     public ChatEntity chatSave(ChatEntity chatEntity) {
     	return chatRepository.save(chatEntity);
     }
-    //roomCd를 통해 해당 방의 채팅 기록을 불러오는 메서드
-    public List<ChatEntity> chatFindByRoomCd(Long roomCd){
-    	return chatRepository.findByRoomCd(roomCd);
+    //ChannelId를 통해 해당 방의 채팅 기록을 불러오는 메서드
+    public List<ChatEntity> chatFindByChannelId(Long channelId){
+    	return chatRepository.findByChannelId(channelId);
     }
     
 }

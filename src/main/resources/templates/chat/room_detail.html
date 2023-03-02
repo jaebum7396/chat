@@ -33,7 +33,7 @@
 <script>
    	const chatUrl = "192.168.0.8:7080";
     const userNm = localStorage.getItem('wschat.sender');
-    const roomCd = localStorage.getItem('wschat.roomCd');
+    const ChannelId = localStorage.getItem('wschat.ChannelId');
 	const mainUrl = window.location.href.split('http://')[1];
 	
     var requestDomain;
@@ -63,7 +63,7 @@
             let msg = document.getElementById("msg");
             let ChatMessage = new Object();
             ChatMessage.messageType = 'COMM';
-            ChatMessage.roomCd = roomCd;
+            ChatMessage.ChannelId = ChannelId;
             ChatMessage.userCd = userNm;
             ChatMessage.userNm = userNm;
             ChatMessage.message = msg.value;
@@ -83,7 +83,7 @@
             
             let ChatMessage = new Object();
             ChatMessage.messageType = 'EXIT';
-            ChatMessage.roomCd = roomCd;
+            ChatMessage.ChannelId = ChannelId;
             ChatMessage.userCd = userNm;
             ChatMessage.userNm = userNm;
             ChatMessage.message = str;
@@ -100,7 +100,7 @@
             
             let ChatMessage = new Object();
             ChatMessage.messageType = 'ENTER';
-            ChatMessage.roomCd = roomCd;
+            ChatMessage.ChannelId = ChannelId;
             ChatMessage.userCd = userNm;
             ChatMessage.userNm = userNm;
             ChatMessage.message = str;
@@ -113,10 +113,10 @@
         
         function loadRoom(){
         	 var params = new URLSearchParams();
-             //params.append("roomCd", localStorage.getItem('wschat.roomCd'));
-             //let params = '&roomCd='+localStorage.getItem('wschat.roomCd')
+             //params.append("ChannelId", localStorage.getItem('wschat.ChannelId'));
+             //let params = '&ChannelId='+localStorage.getItem('wschat.ChannelId')
              
-             axios.get('http://'+chatUrl+'/chat/loadRoom?roomCd='+localStorage.getItem('wschat.roomCd'), params)
+             axios.get('http://'+chatUrl+'/chat/loadRoom?ChannelId='+localStorage.getItem('wschat.ChannelId'), params)
              .then(response => {
                  console.log(response)
             	 let chatArr = response.data.result.chatArr;

@@ -28,7 +28,7 @@ public class ChatRoomController {
 	@Autowired
 	ChatService chatService;
 	
-	@ApiOperation(value = "방 개설", notes = "roomNm 입력 방개설")
+	@ApiOperation(value = "방 개설", notes = "ChannelName 입력 방개설")
 	@PostMapping("/createRoom")
 	@ResponseBody
 	public ResponseEntity createRoom(@RequestParam String name) {
@@ -67,22 +67,22 @@ public class ChatRoomController {
 	@ApiOperation(value = "방 퇴장", notes = "")
 	@PostMapping("/exitRoom")
 	@ResponseBody
-	public ResponseEntity exitRoom(@RequestParam String userCd,@RequestParam Long roomCd) {
-		return chatService.exitRoom(userCd,roomCd);
+	public ResponseEntity exitRoom(@RequestParam String userCd,@RequestParam Long ChannelId) {
+		return chatService.exitRoom(userCd,ChannelId);
 	}
 	
 	@ApiOperation(value = "멤버 조회", notes = "멤버 조회")
 	@GetMapping("/findActiveMember")
 	@ResponseBody
-	public ResponseEntity findActiveMember(@RequestParam Long roomCd) {
-		return chatService.findActiveMember(roomCd);
+	public ResponseEntity findActiveMember(@RequestParam Long ChannelId) {
+		return chatService.findActiveMember(ChannelId);
 	}
 	
 	@ApiOperation(value = "해당 방 대화 조회", notes = "해당 방 대화 조회")
 	@GetMapping("/loadRoom")
 	@ResponseBody
-	public ResponseEntity loadRoom(@RequestParam Long roomCd) {
-		return chatService.loadRoom(roomCd);
+	public ResponseEntity loadRoom(@RequestParam Long ChannelId) {
+		return chatService.loadRoom(ChannelId);
 	}
 	
 	@GetMapping("/room_list")
@@ -90,9 +90,9 @@ public class ChatRoomController {
         return "chat/room_list";
     }
 	
-	@GetMapping("/room_detail/{roomCd}")
-    public String roomDetail(Model model, @PathVariable Long roomCd){
-		model.addAttribute("roomCd", roomCd);
+	@GetMapping("/room_detail/{ChannelId}")
+    public String roomDetail(Model model, @PathVariable Long ChannelId){
+		model.addAttribute("ChannelId", ChannelId);
         return "chat/room_detail";
     }
 }

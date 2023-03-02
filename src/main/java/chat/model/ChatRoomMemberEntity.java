@@ -2,6 +2,7 @@ package chat.model;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
@@ -23,7 +24,8 @@ import lombok.experimental.SuperBuilder;
 @Entity(name = "TB_CHAT_ROOM_MEMBER")
 public class ChatRoomMemberEntity  extends BaseEntity implements Serializable{
 	@Id
-	private Long roomCd;
+	@Column(nullable = false, name = "CHANNEL_ID")
+	private Long channelId;
 	@Id
 	private String userCd;
 
