@@ -7,14 +7,15 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import chat.model.ChatMessage;
 import chat.service.ChatService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
@@ -33,12 +34,34 @@ public class ChatRoomController {
 	public ResponseEntity createRoom(@RequestParam String name) {
 		return chatService.createRoom(name);
 	}
+	
+	@ApiOperation(value = "toUser 방 개설", notes = "toUser 방개설")
+	@PostMapping("/createRoomWithUser")
+	@ResponseBody
+	public ResponseEntity createRoomWithUser(@RequestParam String LOGIN_USER_ID, @RequestParam String TO_USER_ID) {
+		return chatService.createRoomWithUser(LOGIN_USER_ID, TO_USER_ID);
+	}
+	
+	@ApiOperation(value = "toUser 방 개설", notes = "toUser 방개설")
+	@PostMapping("/sendMessage")
+	@ResponseBody
+	public ResponseEntity sendMessage(@RequestBody ChatMessage chatMessage) {
+		return chatService.sendMessage(chatMessage);
+	}
+
 
 	@ApiOperation(value = "모든 방 조회", notes = "모든 방 조회")
 	@GetMapping("/activeRoomList")
 	@ResponseBody
 	public ResponseEntity activeRoomList() {
 		return chatService.activeRoomList();
+	}
+	
+	@ApiOperation(value = "모든 방 조회", notes = "모든 방 조회")
+	@GetMapping("/activeMyRoomList")
+	@ResponseBody
+	public ResponseEntity activeMyRoomList() {
+		return chatService.activeMyRoomList();
 	}
 	
 	@ApiOperation(value = "방 퇴장", notes = "")

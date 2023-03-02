@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import chat.model.BaseEntity;
 import chat.model.ChatMessage;
-import chat.model.ChatRoomEntity;
+import chat.model.ChannelEntity;
 import chat.model.ChatRoomMemberEntity;
 import chat.service.ChatService;
 import lombok.RequiredArgsConstructor;
@@ -52,8 +52,8 @@ public class MyWebSocketHandler extends TextWebSocketHandler {
         List<ChatRoomMemberEntity> crmeArr = chatService.chatRoomMemberFindByRoomCdAndConnectYn(crme.getRoomCd(), 1);
         
         if(crmeArr.size()==0) {
-        	ChatRoomEntity cre = chatService.chatRoomFindByRoomCd(crme.getRoomCd()).get();
-        	ChatRoomEntity creUpdate = ChatRoomEntity.builder().roomCd(cre.getRoomCd()).roomNm(cre.getRoomNm()).deleteYn(-1).build();
+        	ChannelEntity cre = chatService.chatRoomFindByRoomCd(crme.getRoomCd()).get();
+        	ChannelEntity creUpdate = ChannelEntity.builder().roomCd(cre.getRoomCd()).roomNm(cre.getRoomNm()).deleteYn(-1).build();
         	chatService.chatRoomSave(creUpdate);
         }
         log.info("전체세션 : " +list.toString());

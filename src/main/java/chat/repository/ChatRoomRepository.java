@@ -6,12 +6,12 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import chat.model.ChatRoomEntity;
+import chat.model.ChannelEntity;
 
 @Repository
-public interface ChatRoomRepository extends JpaRepository<ChatRoomEntity,String> {
-	ChatRoomEntity save(ChatRoomEntity chatRoomEntity);
-    Optional<ChatRoomEntity> findByRoomCd(Long roomCd);
-    List<ChatRoomEntity> findByDeleteYn(int deleteYn);
-    List<ChatRoomEntity> findAll();
+public interface ChatRoomRepository extends JpaRepository<ChannelEntity,String> {
+	ChannelEntity save(ChannelEntity ChannelEntity);
+    Optional<ChannelEntity> findByRoomCd(Long roomCd);
+    List<ChannelEntity> findByDeleteYn(int deleteYn);
+    List<ChannelEntity> findAll();
 }

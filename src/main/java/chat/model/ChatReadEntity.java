@@ -1,6 +1,6 @@
 package chat.model;
 
-import javax.persistence.Column;
+import javax.persistence.Column; 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -17,13 +17,16 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "TB_CHAT_ROOM")
-public class ChatRoomEntity extends BaseEntity {
-    @Id
+@Entity(name = "TB_CHAT_READ")
+public class ChatReadEntity  extends BaseEntity {
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long roomCd;
-    @Column(nullable = false)
-    private String roomNm;
+    private String READ_ID;
+	
+	private String USER_ID;
     
-    private String sessionId;
+    private String MESSAGE_ID;
+    
+    private String READ_YN;
+    
 }

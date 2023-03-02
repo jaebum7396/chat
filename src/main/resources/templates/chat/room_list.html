@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" xmlns:v-on="http://www.w3.org/1999/xhtml"
+<html lang="ko" xmlns:v-on="http://www.w3.org/1999/xhtml"
 	xmlns:v-bind="http://www.w3.org/1999/xhtml">
 <head>
 <title>Websocket Chat</title>
@@ -7,8 +7,8 @@
 <meta name="viewport"
 	content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <!-- CSS -->
-<link rel="stylesheet"
-	href="/webjars/bootstrap/4.3.1/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 <style>
 [v-cloak] {
 	display: none;
@@ -40,9 +40,10 @@
 		</ul>
 	</div>
 	<!-- JavaScript -->
-	<script src="/webjars/axios/0.17.1/dist/axios.min.js"></script>
-	<script src="/webjars/vue/2.5.16/dist/vue.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/axios@0.17.1/dist/axios.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
 	<script>
+	const chatUrl = "192.168.0.8:7080";
     var vm = new Vue({
         el: '#app',
         data: {
@@ -56,7 +57,7 @@
         },
         methods: {
         	activeRoomList: function() {
-                axios.get('/chat/activeRoomList')
+                axios.get('http://'+chatUrl+'/chat/activeRoomList')
                 .then(response => {
                     console.log(response)
                     this.chatrooms = response.data.result.chatRooms;
@@ -72,7 +73,7 @@
                 } else {
                     var params = new URLSearchParams();
                     params.append("name",this.room_name);
-                    axios.post('/chat/createRoom', params)
+                    axios.post('http://'+chatUrl+'/chat/createRoom', params)
                     .then(response => {
                         console.log(response)
                         alert(response.data.result.chatRoom.roomNm+"방 개설에 성공하였습니다.")
@@ -90,7 +91,7 @@
                 if(sender !== "") {
                     localStorage.setItem('wschat.sender',sender);
                     localStorage.setItem('wschat.roomCd',roomCd);
-                    location.href="/chat/room_detail/"+roomCd;
+                    location.href="room_detail.html";
                 }
             }
         }

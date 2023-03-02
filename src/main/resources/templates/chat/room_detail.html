@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org"
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
 	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+	<meta charset="utf-8">
 	<body>
 		<div style='display:flex; justify-content:center;'>
 			<div class="container" style='position:absolute; width: 500px; height: 800px; background-color:yellow'>
@@ -27,13 +28,23 @@
 		</div>
 	</body>
 <!-- JavaScript -->
-<script src="/webjars/axios/0.17.1/dist/axios.min.js"></script>
-<script src="/js/jquery/jquery-3.4.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios@0.17.1/dist/axios.min.js"></script>
+<script src="../lib/jquery/jquery-3.4.1.min.js"></script>
 <script>
+   	const chatUrl = "192.168.0.8:7080";
+    const userNm = localStorage.getItem('wschat.sender');
+    const roomCd = localStorage.getItem('wschat.roomCd');
+	const mainUrl = window.location.href.split('http://')[1];
+	
+    var requestDomain;
+    if(mainUrl.indexOf('.com')>0||mainUrl.indexOf('.co.kr')){
+    	requestDomain = mainUrl.split('/')[0]+'/'+mainUrl.split('/')[1];
+    }else{
+    	requestDomain = mainUrl.split('/')[0];
+    }
+    console.log(requestDomain);
     $(document).ready(function(){
-        const userNm = localStorage.getItem('wschat.sender');
-        const roomCd = localStorage.getItem('wschat.roomCd');
-
+        
         $("#disconn").on("click", (e) => {
             disconnect();
         })
@@ -42,7 +53,7 @@
             send();
         });
         
-        const websocket = new WebSocket("ws://localhost:8080/ws/chat");
+        const websocket = new WebSocket('ws://'+chatUrl+'/ws/chat');
 
         websocket.onmessage = onMessage;
         websocket.onopen = onOpen;
@@ -54,10 +65,14 @@
             ChatMessage.messageType = 'COMM';
             ChatMessage.roomCd = roomCd;
             ChatMessage.userCd = userNm;
-            ChatMessage.userCd = userNm;
+            ChatMessage.userNm = userNm;
             ChatMessage.message = msg.value;
+            ChatMessage.domain = requestDomain;
 
             let ChatMessageStr = JSON.stringify(ChatMessage)
+            
+            console.log(ChatMessageStr)
+            
             websocket.send(ChatMessageStr);
             msg.value = '';
         }
@@ -72,6 +87,7 @@
             ChatMessage.userCd = userNm;
             ChatMessage.userNm = userNm;
             ChatMessage.message = str;
+            ChatMessage.domain = requestDomain;
 
             let ChatMessageStr = JSON.stringify(ChatMessage)
             
@@ -88,6 +104,7 @@
             ChatMessage.userCd = userNm;
             ChatMessage.userNm = userNm;
             ChatMessage.message = str;
+            ChatMessage.domain = requestDomain;
 
             let ChatMessageStr = JSON.stringify(ChatMessage)
             
@@ -99,7 +116,7 @@
              //params.append("roomCd", localStorage.getItem('wschat.roomCd'));
              //let params = '&roomCd='+localStorage.getItem('wschat.roomCd')
              
-             axios.get('/chat/loadRoom?roomCd='+localStorage.getItem('wschat.roomCd'), params)
+             axios.get('http://'+chatUrl+'/chat/loadRoom?roomCd='+localStorage.getItem('wschat.roomCd'), params)
              .then(response => {
                  console.log(response)
             	 let chatArr = response.data.result.chatArr;

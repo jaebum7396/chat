@@ -20,13 +20,14 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import chat.model.ChannelEntity;
 import chat.model.ChatEntity;
 import chat.model.ChatMessage;
 import chat.model.ChatResponse;
-import chat.model.ChatRoomEntity;
 import chat.model.ChatRoomMemberEntity;
 import chat.model.ChatRoomMemberId;
 import chat.repository.ChatRepository;
@@ -34,14 +35,13 @@ import chat.repository.ChatRoomMemberRepository;
 import chat.repository.ChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Mono;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class ChatService {
     private final ObjectMapper objectMapper;
-    private ArrayList<ChatRoomEntity> chatRoomEntityArr;
+    private ArrayList<ChannelEntity> ChannelEntityArr;
     private Set<WebSocketSession> sessions = new HashSet<>();
     
     @Autowired ChatRepository chatRepository;
@@ -50,7 +50,7 @@ public class ChatService {
 
     @PostConstruct
     private void init() {
-    	chatRoomEntityArr = new ArrayList<ChatRoomEntity>();
+    	ChannelEntityArr = new ArrayList<ChannelEntity>();
     }
     
     //웹소켓 요청이 왔을때 처리되는 서비스
@@ -66,21 +66,23 @@ public class ChatService {
                     .build()
             );
             chatMessage.setMessage(chatMessage.getUserCd() + "님이 입장했습니다.");
+            sendMessage(chatMessage);
         }
-        sendMessage(chatMessage);
     }
     
     //메시지 전송 처리 서비스
-    private <T> void sendMessage(T chatMessage) {
+    public <T> ResponseEntity sendMessage(ChatMessage chatMessage) {
+    	ChatResponse chatResponse;
+    	Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
         sessions.parallelStream()
         .forEach(session -> {
         	List<ChatRoomMemberEntity> crme = new ArrayList<ChatRoomMemberEntity>();
-        	if(!"".equals(((ChatMessage)chatMessage).getToUserCd())&&((ChatMessage)chatMessage).getToUserCd()!=null){
+        	if(!"".equals(chatMessage.getToUserCd())&&chatMessage.getToUserCd()!=null){
         		System.out.println("toUserCd != null");
-        		crme = chatRoomMemberFindByRoomCdAndUserCdAndConnectYn(((ChatMessage)chatMessage).getRoomCd(), ((ChatMessage)chatMessage).getToUserCd(), 1);
+        		crme = chatRoomMemberFindByRoomCdAndUserCdAndConnectYn(chatMessage.getRoomCd(), chatMessage.getToUserCd(), 1);
         	}else {
         		System.out.println("toUserCd == null");
-        		crme = chatRoomMemberFindByRoomCdAndConnectYn(((ChatMessage)chatMessage).getRoomCd(), 1);
+        		crme = chatRoomMemberFindByRoomCdAndConnectYn(chatMessage.getRoomCd(), 1);
         	}
         	if(crme.stream().filter(member -> session.getId().equals(member.getSession())).findAny().isPresent()) {
         		try {
@@ -91,11 +93,20 @@ public class ChatService {
         	};
         });
         //채팅 로그를 저장한다.
-        chatSave(
-    		((ChatMessage)chatMessage).toEntity()
+        ChatEntity chatEntity = chatSave(
+    		chatMessage.toEntity()
 		);
         
-        requestClient(((ChatMessage)chatMessage).getDomain(),((ChatMessage)chatMessage));
+        resultMap.put("chatMessage",chatMessage);
+        
+        chatResponse = ChatResponse.builder()
+                .statusCode(HttpStatus.OK.value())
+                .status(HttpStatus.OK)
+                .message("요청 성공")
+                .result(resultMap).build();
+        return ResponseEntity.ok().body(chatResponse);
+        
+        //requestClient("http://"+chatMessage.getDomain()+"/chat/socketEndpoint.jsp", chatEntity);
     }
 
     //방을 생성하는 서비스
@@ -104,12 +115,64 @@ public class ChatService {
         Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
         try {
             String randomId = UUID.randomUUID().toString();
-            ChatRoomEntity chatRoomEntity = ChatRoomEntity.builder().roomNm(roomNm).sessionId(randomId).deleteYn(-1).build();
-            chatRoomEntityArr.add(chatRoomEntity);  
-            chatRoomSave(chatRoomEntity);
+            ChannelEntity channelEntity = ChannelEntity.builder().roomNm(roomNm).sessionId(randomId).deleteYn(-1).build();
+            ChannelEntityArr.add(channelEntity);  
+            chatRoomSave(channelEntity);
             
-            resultMap.put("chatRoom",chatRoomEntity);
+            resultMap.put("chatRoom",channelEntity);
             
+            chatResponse = ChatResponse.builder()
+                    .statusCode(HttpStatus.OK.value())
+                    .status(HttpStatus.OK)
+                    .message("요청 성공")
+                    .result(resultMap).build();
+            return ResponseEntity.ok().body(chatResponse);
+        } catch (Exception e) {
+            e.printStackTrace();
+            chatResponse = ChatResponse.builder()
+                    .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .message("서버쪽 오류가 발생했습니다. 관리자에게 문의하십시오")
+                    .result(resultMap).build();
+            return ResponseEntity.internalServerError().body(chatResponse);
+        }
+    }
+    
+    //방을 생성하는 서비스
+    public ResponseEntity createRoomWithUser(String LOGIN_USER_ID, String TO_USER_ID) {
+        ChatResponse chatResponse;
+        Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+        try {
+            String randomId = UUID.randomUUID().toString();
+            ChannelEntity channelEntity = ChannelEntity.builder().sessionId(randomId).deleteYn(-1).build();
+            ChannelEntityArr.add(channelEntity);  
+            chatRoomSave(channelEntity);
+            
+            resultMap.put("chatRoom",channelEntity);
+            
+            chatResponse = ChatResponse.builder()
+                    .statusCode(HttpStatus.OK.value())
+                    .status(HttpStatus.OK)
+                    .message("요청 성공")
+                    .result(resultMap).build();
+            return ResponseEntity.ok().body(chatResponse);
+        } catch (Exception e) {
+            e.printStackTrace();
+            chatResponse = ChatResponse.builder()
+                    .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .message("서버쪽 오류가 발생했습니다. 관리자에게 문의하십시오")
+                    .result(resultMap).build();
+            return ResponseEntity.internalServerError().body(chatResponse);
+        }
+    }
+    
+    //모든 활성화된 방 리스트를 조회하는 서비스
+    public ResponseEntity activeMyRoomList() {
+        ChatResponse chatResponse;
+        Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+        try {
+        	resultMap.put("chatRooms",chatRoomFindByDeleteYn(-1));
             chatResponse = ChatResponse.builder()
                     .statusCode(HttpStatus.OK.value())
                     .status(HttpStatus.OK)
@@ -154,10 +217,10 @@ public class ChatService {
         ChatResponse chatResponse;
         Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
         try {
-        	Optional<ChatRoomEntity> optChatRoomEntity = chatRoomFindByRoomCd(roomCd);
-        	ChatRoomEntity chatRoomEntity = optChatRoomEntity.orElseGet(() -> ChatRoomEntity.builder().build());
+        	Optional<ChannelEntity> optChannelEntity = chatRoomFindByRoomCd(roomCd);
+        	ChannelEntity channelEntity = optChannelEntity.orElseGet(() -> ChannelEntity.builder().build());
     
-            resultMap.put("chatRoom", chatRoomEntity);
+            resultMap.put("chatRoom", channelEntity);
             chatResponse = ChatResponse.builder()
                     .statusCode(HttpStatus.OK.value())
                     .status(HttpStatus.OK)
@@ -254,43 +317,53 @@ public class ChatService {
         }
     }
     
-    public void requestClient(String url, ChatMessage chatMessage) {
-    	DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(url);
-    	factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.VALUES_ONLY);
+    public void requestClient(String url, ChatEntity chatEntity) {
+    	try {
+    		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(url);
+    		factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.VALUES_ONLY);
     		
-    	WebClient webClient = WebClient.builder()
-    			.uriBuilderFactory(factory)
-				.baseUrl(url)
-				.build();
-    	String response = webClient.post()
-                .uri(uriBuilder -> uriBuilder
-                		.queryParam("roomCd", chatMessage.getRoomCd())
-                		.queryParam("userCd", chatMessage.getUserCd())
-                		.queryParam("toUserCd", chatMessage.getToUserCd())
-                		.queryParam("message", chatMessage.getMessage())
-                		.build())
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
-        System.out.println("응답결과 : "+response);
+    		WebClient webClient = WebClient.builder()
+    				.uriBuilderFactory(factory)
+    				.baseUrl(url)
+    				.build();
+    		
+    		String uri = UriComponentsBuilder.fromHttpUrl(url)
+				.queryParam("MESSAGE_ID", chatEntity.getMESSAGE_ID())
+    			.queryParam("roomCd", chatEntity.getRoomCd())
+				.queryParam("userCd", chatEntity.getUserCd())
+				.queryParam("toUserCd", chatEntity.getToUserCd()==null||chatEntity.getToUserCd().equals("") ? "" : chatEntity.getToUserCd())
+				.queryParam("message", chatEntity.getMessage())
+    		  .toUriString();
+    		
+    		System.out.println(uri);
+    		
+    		String response = webClient.get()
+    				.uri(uri)
+    				.retrieve()
+    				.bodyToMono(String.class)
+    				.block();
+    		System.out.println("응답결과 : "+response);
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    	}
     }
     
     //[CRUD]chatRoom
     
     //채팅룸 변경 사항 저장하는 메서드
-    public ChatRoomEntity chatRoomSave(ChatRoomEntity chatRoomEntity) {
-    	return chatRoomRepository.save(chatRoomEntity);
+    public ChannelEntity chatRoomSave(ChannelEntity ChannelEntity) {
+    	return chatRoomRepository.save(ChannelEntity);
     }
     //룸코드를 통해 채팅방을 조회하는 메서드 
-    public Optional<ChatRoomEntity> chatRoomFindByRoomCd(Long roomCd){
+    public Optional<ChannelEntity> chatRoomFindByRoomCd(Long roomCd){
     	return chatRoomRepository.findByRoomCd(roomCd);
     }
     //모든 채팅방을 조회하는 메서드
-    public List<ChatRoomEntity> chatRoomFindAll(){
+    public List<ChannelEntity> chatRoomFindAll(){
     	return chatRoomRepository.findAll();
     }
     //모든 활성 채팅방을 조회하는 메서드
-    public List<ChatRoomEntity> chatRoomFindByDeleteYn(int deleteYn){
+    public List<ChannelEntity> chatRoomFindByDeleteYn(int deleteYn){
     	return chatRoomRepository.findByDeleteYn(deleteYn);
     }
     

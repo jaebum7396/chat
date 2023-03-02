@@ -23,9 +23,9 @@ import lombok.experimental.SuperBuilder;
 @Entity(name = "TB_CHAT_ROOM_MEMBER")
 public class ChatRoomMemberEntity  extends BaseEntity implements Serializable{
 	@Id
-	private String userCd;
-	@Id
 	private Long roomCd;
+	@Id
+	private String userCd;
 
     private String userNm;
     
