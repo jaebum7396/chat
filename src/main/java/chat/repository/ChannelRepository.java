@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import chat.model.ChannelEntity;
 
 @Repository
-public interface ChatRoomRepository extends JpaRepository<ChannelEntity,String> {
+public interface ChannelRepository extends JpaRepository<ChannelEntity,String> {
 	ChannelEntity save(ChannelEntity ChannelEntity);
     Optional<ChannelEntity> findByChannelId(Long ChannelId);
     List<ChannelEntity> findByDeleteYn(int deleteYn);

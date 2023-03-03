@@ -14,8 +14,8 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 @Embeddable
-public class ChatRoomMemberId implements Serializable{
-    private String userCd;
+public class ChannelUserId implements Serializable{
+    private String userId;
     
     private Long channelId;
 }

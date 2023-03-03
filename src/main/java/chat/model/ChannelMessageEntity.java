@@ -17,8 +17,8 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "TB_CHAT")
-public class ChatEntity  extends BaseEntity {
+@Entity(name = "TB_CHANNEL_MESSAGE")
+public class ChannelMessageEntity  extends BaseEntity {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String MESSAGE_ID;
@@ -32,9 +32,9 @@ public class ChatEntity  extends BaseEntity {
     private Long channelId;
 
     @Column(nullable = false)
-    private String userCd;
+    private String userId;
     
-    private String toUserCd;
+    private String toUserId;
 
     private String message;
     

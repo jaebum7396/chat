@@ -13,33 +13,33 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import chat.model.ChatMessage;
-import chat.service.ChatService;
+import chat.service.ChannelService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
-@Api(tags = "ChatRoomController")
-@Tag(name = "ChatRoomController", description = "채팅 방 서비스 제공")
+@Api(tags = "ChannelController")
+@Tag(name = "ChannelController", description = "채팅 방 서비스 제공")
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/chat")
-public class ChatRoomController {
+public class ChannelController {
 	@Autowired
-	ChatService chatService;
+	ChannelService chatService;
 	
 	@ApiOperation(value = "방 개설", notes = "ChannelName 입력 방개설")
-	@PostMapping("/createRoom")
+	@PostMapping("/createChannel")
 	@ResponseBody
-	public ResponseEntity createRoom(@RequestParam String name) {
-		return chatService.createRoom(name);
+	public ResponseEntity createChannel(@RequestParam String name) {
+		return chatService.createChannel(name);
 	}
 	
 	@ApiOperation(value = "toUser 방 개설", notes = "toUser 방개설")
-	@PostMapping("/createRoomWithUser")
+	@PostMapping("/createChannelWithUser")
 	@ResponseBody
-	public ResponseEntity createRoomWithUser(@RequestParam String LOGIN_USER_ID, @RequestParam String TO_USER_ID) {
-		return chatService.createRoomWithUser(LOGIN_USER_ID, TO_USER_ID);
+	public ResponseEntity createChannelWithUser(@RequestParam String LOGIN_USER_ID, @RequestParam String TO_USER_ID) {
+		return chatService.createChannelWithUser(LOGIN_USER_ID, TO_USER_ID);
 	}
 	
 	@ApiOperation(value = "toUser 방 개설", notes = "toUser 방개설")
@@ -51,24 +51,24 @@ public class ChatRoomController {
 
 
 	@ApiOperation(value = "모든 방 조회", notes = "모든 방 조회")
-	@GetMapping("/activeRoomList")
+	@GetMapping("/activeChannelList")
 	@ResponseBody
-	public ResponseEntity activeRoomList() {
-		return chatService.activeRoomList();
+	public ResponseEntity activeChannelList() {
+		return chatService.activeChannelList();
 	}
 	
 	@ApiOperation(value = "모든 방 조회", notes = "모든 방 조회")
-	@GetMapping("/activeMyRoomList")
+	@GetMapping("/activeMyChannelList")
 	@ResponseBody
-	public ResponseEntity activeMyRoomList() {
-		return chatService.activeMyRoomList();
+	public ResponseEntity activeMyChannelList() {
+		return chatService.activeMyChannelList();
 	}
 	
 	@ApiOperation(value = "방 퇴장", notes = "")
-	@PostMapping("/exitRoom")
+	@PostMapping("/exitChannel")
 	@ResponseBody
-	public ResponseEntity exitRoom(@RequestParam String userCd,@RequestParam Long ChannelId) {
-		return chatService.exitRoom(userCd,ChannelId);
+	public ResponseEntity exitChannel(@RequestParam String userId,@RequestParam Long ChannelId) {
+		return chatService.exitChannel(userId,ChannelId);
 	}
 	
 	@ApiOperation(value = "멤버 조회", notes = "멤버 조회")
@@ -79,20 +79,20 @@ public class ChatRoomController {
 	}
 	
 	@ApiOperation(value = "해당 방 대화 조회", notes = "해당 방 대화 조회")
-	@GetMapping("/loadRoom")
+	@GetMapping("/loadChannel")
 	@ResponseBody
-	public ResponseEntity loadRoom(@RequestParam Long ChannelId) {
-		return chatService.loadRoom(ChannelId);
+	public ResponseEntity loadChannel(@RequestParam Long ChannelId) {
+		return chatService.loadChannel(ChannelId);
 	}
 	
-	@GetMapping("/room_list")
-    public String roomList(){
-        return "chat/room_list";
+	@GetMapping("/channel_list")
+    public String channelList(){
+        return "chat/channel_list";
     }
 	
-	@GetMapping("/room_detail/{ChannelId}")
-    public String roomDetail(Model model, @PathVariable Long ChannelId){
+	@GetMapping("/channel_detail/{ChannelId}")
+    public String channelDetail(Model model, @PathVariable Long ChannelId){
 		model.addAttribute("ChannelId", ChannelId);
-        return "chat/room_detail";
+        return "chat/channel_detail";
     }
 }

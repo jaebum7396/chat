@@ -20,18 +20,22 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper=false)
-@IdClass(ChatRoomMemberId.class)
-@Entity(name = "TB_CHAT_ROOM_MEMBER")
-public class ChatRoomMemberEntity  extends BaseEntity implements Serializable{
+@IdClass(ChannelUserId.class)
+@Entity(name = "TB_CHANNEL_USER")
+public class ChannelUserEntity  extends BaseEntity implements Serializable{
 	@Id
 	@Column(nullable = false, name = "CHANNEL_ID")
 	private Long channelId;
+	
 	@Id
-	private String userCd;
+	@Column(nullable = false, name = "USER_ID")
+	private String userId;
 
     private String userNm;
     
-    private String session;
+    @Column(name = "SESSION_ID")
+    private String sessionId;
     
+    @Column(name = "CONNECT_YN")
     private int connectYn;
 }

@@ -18,20 +18,20 @@ public class ChatMessage {
     @Column(nullable = false, name = "CHANNEL_ID")
     private Long channelId;
     
-    private String userCd;
+    private String userId;
 
-    private String toUserCd;
+    private String toUserId;
     
     private String message;
     
     private String domain;
     
-    public ChatEntity toEntity(){
-    	return ChatEntity.builder()
+    public ChannelMessageEntity toEntity(){
+    	return ChannelMessageEntity.builder()
 			.messageType(messageType.toString())
 			.channelId(channelId)
-			.userCd(userCd)
-			.toUserCd(toUserCd)
+			.userId(userId)
+			.toUserId(toUserId)
 			.message(message)
 			.domain(domain)
 			.build();
@@ -39,8 +39,8 @@ public class ChatMessage {
     //public URI toUri() {
     //    return uriBuilder
     //    .queryParam("ChannelId", ChannelId)
-    //    .queryParam("userCd", userCd)
-    //    .queryParam("toUserCd", toUserCd)
+    //    .queryParam("userId", userId)
+    //    .queryParam("touserId", touserId)
     //    .queryParam("message", message)
     //    .build();
     //}

@@ -64,7 +64,7 @@
             let ChatMessage = new Object();
             ChatMessage.messageType = 'COMM';
             ChatMessage.ChannelId = ChannelId;
-            ChatMessage.userCd = userNm;
+            ChatMessage.userId = userNm;
             ChatMessage.userNm = userNm;
             ChatMessage.message = msg.value;
             ChatMessage.domain = requestDomain;
@@ -84,7 +84,7 @@
             let ChatMessage = new Object();
             ChatMessage.messageType = 'EXIT';
             ChatMessage.ChannelId = ChannelId;
-            ChatMessage.userCd = userNm;
+            ChatMessage.userId = userNm;
             ChatMessage.userNm = userNm;
             ChatMessage.message = str;
             ChatMessage.domain = requestDomain;
@@ -101,7 +101,7 @@
             let ChatMessage = new Object();
             ChatMessage.messageType = 'ENTER';
             ChatMessage.ChannelId = ChannelId;
-            ChatMessage.userCd = userNm;
+            ChatMessage.userId = userNm;
             ChatMessage.userNm = userNm;
             ChatMessage.message = str;
             ChatMessage.domain = requestDomain;
@@ -150,7 +150,7 @@
                 var str = '';
                 str += "<div class='col-6'>";
                 str += 		"<div>";
-                str += 		"<b>" + p_data.userCd + " : " + p_data.message + "</b>";
+                str += 		"<b>" + p_data.userId + " : " + p_data.message + "</b>";
                 str += "</div>";
                 $("#msgArea").append(str);
             }
@@ -158,7 +158,7 @@
                 var str = '';
                 str += "<div class='col-6'>";
                 str += 		"<div>";
-                str += 		"<b>" + p_data.userCd + " : " + p_data.message + "</b>";
+                str += 		"<b>" + p_data.userId + " : " + p_data.message + "</b>";
                 str += "</div>";
                 $("#msgArea").append(str);
             }

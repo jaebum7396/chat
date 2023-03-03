@@ -11,7 +11,7 @@ import lombok.Data;
 @Data
 @Builder
 @AllArgsConstructor
-public class ChatResponse {
+public class ChannelResponse {
     int statusCode;
     HttpStatus status;
     String message;
