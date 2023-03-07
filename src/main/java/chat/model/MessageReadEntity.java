@@ -17,16 +17,20 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "TB_CHAT_READ")
-public class ChatReadEntity  extends BaseEntity {
-	@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String READ_ID;
+@Entity(name = "TB_MESSAGE_READ")
+public class MessageReadEntity  extends BaseEntity {
+	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 	
-	private String USER_ID;
+	@Column(name = "READ_CD")
+    private Long readCd;
     
-    private String MESSAGE_ID;
+    @Column(name = "MESSAGE_CD")
+    private Long messageCd;
     
-    private String READ_YN;
+    @Column(name = "USER_CD")
+    private Long userCd;
+    
+    @Column(name = "READ_YN", length = 1, columnDefinition = "CHAR(1) DEFAULT 'N'")
+    private char readYn;
     
 }

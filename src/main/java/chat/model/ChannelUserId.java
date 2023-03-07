@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @Embeddable
 public class ChannelUserId implements Serializable{
-    private String userId;
+    private Long userCd;
     
-    private Long channelId;
+    private Long channelCd;
 }

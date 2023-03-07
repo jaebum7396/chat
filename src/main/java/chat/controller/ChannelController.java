@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import chat.model.ChatMessage;
+import chat.model.MessageEntity;
 import chat.service.ChannelService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "ChannelController", description = "채팅 방 서비스 제공")
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/chat")
+@RequestMapping("/channel")
 public class ChannelController {
 	@Autowired
 	ChannelService chatService;
@@ -38,17 +38,16 @@ public class ChannelController {
 	@ApiOperation(value = "toUser 방 개설", notes = "toUser 방개설")
 	@PostMapping("/createChannelWithUser")
 	@ResponseBody
-	public ResponseEntity createChannelWithUser(@RequestParam String LOGIN_USER_ID, @RequestParam String TO_USER_ID) {
-		return chatService.createChannelWithUser(LOGIN_USER_ID, TO_USER_ID);
+	public ResponseEntity createChannelWithUser(@RequestParam Long LOGIN_USER_CD, @RequestParam Long TO_USER_CD) {
+		return chatService.createChannelWithUser(LOGIN_USER_CD, TO_USER_CD);
 	}
 	
 	@ApiOperation(value = "toUser 방 개설", notes = "toUser 방개설")
 	@PostMapping("/sendMessage")
 	@ResponseBody
-	public ResponseEntity sendMessage(@RequestBody ChatMessage chatMessage) {
-		return chatService.sendMessage(chatMessage);
+	public ResponseEntity sendMessage(@RequestBody MessageEntity messageEntity) {
+		return chatService.sendMessage(messageEntity);
 	}
-
 
 	@ApiOperation(value = "모든 방 조회", notes = "모든 방 조회")
 	@GetMapping("/activeChannelList")
@@ -67,22 +66,22 @@ public class ChannelController {
 	@ApiOperation(value = "방 퇴장", notes = "")
 	@PostMapping("/exitChannel")
 	@ResponseBody
-	public ResponseEntity exitChannel(@RequestParam String userId,@RequestParam Long ChannelId) {
-		return chatService.exitChannel(userId,ChannelId);
+	public ResponseEntity exitChannel(@RequestParam Long userCd,@RequestParam Long ChannelCd) {
+		return chatService.exitChannel(userCd,ChannelCd);
 	}
 	
 	@ApiOperation(value = "멤버 조회", notes = "멤버 조회")
 	@GetMapping("/findActiveMember")
 	@ResponseBody
-	public ResponseEntity findActiveMember(@RequestParam Long ChannelId) {
-		return chatService.findActiveMember(ChannelId);
+	public ResponseEntity findActiveMember(@RequestParam Long ChannelCd) {
+		return chatService.findActiveMember(ChannelCd);
 	}
 	
 	@ApiOperation(value = "해당 방 대화 조회", notes = "해당 방 대화 조회")
 	@GetMapping("/loadChannel")
 	@ResponseBody
-	public ResponseEntity loadChannel(@RequestParam Long ChannelId) {
-		return chatService.loadChannel(ChannelId);
+	public ResponseEntity loadChannel(@RequestParam Long ChannelCd) {
+		return chatService.loadChannel(ChannelCd);
 	}
 	
 	@GetMapping("/channel_list")
@@ -90,9 +89,9 @@ public class ChannelController {
         return "chat/channel_list";
     }
 	
-	@GetMapping("/channel_detail/{ChannelId}")
-    public String channelDetail(Model model, @PathVariable Long ChannelId){
-		model.addAttribute("ChannelId", ChannelId);
+	@GetMapping("/channel_detail/{ChannelCd}")
+    public String channelDetail(Model model, @PathVariable Long ChannelCd){
+		model.addAttribute("ChannelCd", ChannelCd);
         return "chat/channel_detail";
     }
 }

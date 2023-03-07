@@ -33,7 +33,7 @@
 <script>
    	const chatUrl = "192.168.0.8:7080";
     const userNm = localStorage.getItem('wschat.sender');
-    const ChannelId = localStorage.getItem('wschat.ChannelId');
+    const ChannelCd = localStorage.getItem('wschat.ChannelCd');
 	const mainUrl = window.location.href.split('http://')[1];
 	
     var requestDomain;
@@ -61,19 +61,19 @@
 
         function send(){
             let msg = document.getElementById("msg");
-            let ChatMessage = new Object();
-            ChatMessage.messageType = 'COMM';
-            ChatMessage.ChannelId = ChannelId;
-            ChatMessage.userId = userNm;
-            ChatMessage.userNm = userNm;
-            ChatMessage.message = msg.value;
-            ChatMessage.domain = requestDomain;
+            let MessageEntity = new Object();
+            MessageEntity.messageType = 'COMM';
+            MessageEntity.ChannelCd = ChannelCd;
+            MessageEntity.userCd = userNm;
+            MessageEntity.userNm = userNm;
+            MessageEntity.message = msg.value;
+            MessageEntity.domain = requestDomain;
 
-            let ChatMessageStr = JSON.stringify(ChatMessage)
+            let MessageEntityStr = JSON.stringify(MessageEntity)
             
-            console.log(ChatMessageStr)
+            console.log(MessageEntityStr)
             
-            websocket.send(ChatMessageStr);
+            websocket.send(MessageEntityStr);
             msg.value = '';
         }
         
@@ -81,42 +81,42 @@
         function onClose(evt) {
             var str = userNm + ": 님이 방을 나가셨습니다.";
             
-            let ChatMessage = new Object();
-            ChatMessage.messageType = 'EXIT';
-            ChatMessage.ChannelId = ChannelId;
-            ChatMessage.userId = userNm;
-            ChatMessage.userNm = userNm;
-            ChatMessage.message = str;
-            ChatMessage.domain = requestDomain;
+            let MessageEntity = new Object();
+            MessageEntity.messageType = 'EXIT';
+            MessageEntity.ChannelCd = ChannelCd;
+            MessageEntity.userCd = userNm;
+            MessageEntity.userNm = userNm;
+            MessageEntity.message = str;
+            MessageEntity.domain = requestDomain;
 
-            let ChatMessageStr = JSON.stringify(ChatMessage)
+            let MessageEntityStr = JSON.stringify(MessageEntity)
             
-            websocket.send(ChatMessageStr);
+            websocket.send(MessageEntityStr);
         }
         
         //채팅창에 들어왔을 때
         function onOpen(evt) {
             var str = userNm + ": 님이 입장하셨습니다.";
             
-            let ChatMessage = new Object();
-            ChatMessage.messageType = 'ENTER';
-            ChatMessage.ChannelId = ChannelId;
-            ChatMessage.userId = userNm;
-            ChatMessage.userNm = userNm;
-            ChatMessage.message = str;
-            ChatMessage.domain = requestDomain;
+            let MessageEntity = new Object();
+            MessageEntity.messageType = 'ENTER';
+            MessageEntity.ChannelCd = ChannelCd;
+            MessageEntity.userCd = userNm;
+            MessageEntity.userNm = userNm;
+            MessageEntity.message = str;
+            MessageEntity.domain = requestDomain;
 
-            let ChatMessageStr = JSON.stringify(ChatMessage)
+            let MessageEntityStr = JSON.stringify(MessageEntity)
             
-            websocket.send(ChatMessageStr);
+            websocket.send(MessageEntityStr);
         }
         
         function loadRoom(){
         	 var params = new URLSearchParams();
-             //params.append("ChannelId", localStorage.getItem('wschat.ChannelId'));
-             //let params = '&ChannelId='+localStorage.getItem('wschat.ChannelId')
+             //params.append("ChannelCd", localStorage.getItem('wschat.ChannelCd'));
+             //let params = '&ChannelCd='+localStorage.getItem('wschat.ChannelCd')
              
-             axios.get('http://'+chatUrl+'/chat/loadRoom?ChannelId='+localStorage.getItem('wschat.ChannelId'), params)
+             axios.get('http://'+chatUrl+'/chat/loadRoom?ChannelCd='+localStorage.getItem('wschat.ChannelCd'), params)
              .then(response => {
                  console.log(response)
             	 let chatArr = response.data.result.chatArr;
@@ -150,7 +150,7 @@
                 var str = '';
                 str += "<div class='col-6'>";
                 str += 		"<div>";
-                str += 		"<b>" + p_data.userId + " : " + p_data.message + "</b>";
+                str += 		"<b>" + p_data.userCd + " : " + p_data.message + "</b>";
                 str += "</div>";
                 $("#msgArea").append(str);
             }
@@ -158,7 +158,7 @@
                 var str = '';
                 str += "<div class='col-6'>";
                 str += 		"<div>";
-                str += 		"<b>" + p_data.userId + " : " + p_data.message + "</b>";
+                str += 		"<b>" + p_data.userCd + " : " + p_data.message + "</b>";
                 str += "</div>";
                 $("#msgArea").append(str);
             }

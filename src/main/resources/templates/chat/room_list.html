@@ -35,8 +35,8 @@
 		</div>
 		<ul class="list-group">
 			<li class="list-group-item list-group-item-action"
-				v-for="item in chatrooms" v-bind:key="item.ChannelId"
-				v-on:click="enterRoom(item.ChannelId)">{{item.ChannelName}}</li>
+				v-for="item in chatrooms" v-bind:key="item.ChannelCd"
+				v-on:click="enterRoom(item.ChannelCd)">{{item.ChannelName}}</li>
 		</ul>
 	</div>
 	<!-- JavaScript -->
@@ -86,11 +86,11 @@
                     });
                 }
             },
-            enterRoom: (ChannelId) => {
+            enterRoom: (ChannelCd) => {
                 var sender = prompt('대화명을 입력해 주세요.');
                 if(sender !== "") {
                     localStorage.setItem('wschat.sender',sender);
-                    localStorage.setItem('wschat.ChannelId',ChannelId);
+                    localStorage.setItem('wschat.ChannelCd',ChannelCd);
                     location.href="room_detail.html";
                 }
             }

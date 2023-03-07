@@ -13,7 +13,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import chat.model.BaseEntity;
-import chat.model.ChatMessage;
+import chat.model.MessageEntity;
 import chat.model.ChannelEntity;
 import chat.model.ChannelUserEntity;
 import chat.service.ChannelService;
@@ -32,8 +32,8 @@ public class MyWebSocketHandler extends TextWebSocketHandler {
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String payload = message.getPayload();
         log.info("payload : {}", payload);
-        ChatMessage chatMessage = objectMapper.readValue(payload, ChatMessage.class);
-        chatService.handlerActions(session, chatMessage);
+        MessageEntity messageEntity = objectMapper.readValue(payload, MessageEntity.class);
+        chatService.handlerActions(session, messageEntity);
     }
     //* Client가 접속 시 호출되는 메서드 *//*
     @Override
@@ -48,12 +48,12 @@ public class MyWebSocketHandler extends TextWebSocketHandler {
         log.info(session + " 클라이언트 접속 해제");
         list.remove(session);
         ChannelUserEntity crme = chatService.channelUserFindBySession(session.getId()).orElseGet(() -> ChannelUserEntity.builder().build()); //현재 방 나간 멤버 정보
-        chatService.exitChannel(crme.getUserId(), crme.getChannelId());
-        List<ChannelUserEntity> crmeArr = chatService.channelUserFindByChannelIdAndConnectYn(crme.getChannelId(), 1);
+        chatService.exitChannel(crme.getUserCd(), crme.getChannelCd());
+        List<ChannelUserEntity> crmeArr = chatService.channelUserFindByChannelCdAndConnectYn(crme.getChannelCd(), 'Y');
         
         if(crmeArr.size()==0) {
-        	ChannelEntity cre = chatService.channelFindByChannelId(crme.getChannelId()).get();
-        	ChannelEntity creUpdate = ChannelEntity.builder().channelId(cre.getChannelId()).channelName(cre.getChannelName()).deleteYn(-1).build();
+        	ChannelEntity cre = chatService.channelFindByChannelCd(crme.getChannelCd()).get();
+        	ChannelEntity creUpdate = ChannelEntity.builder().channelCd(cre.getChannelCd()).channelName(cre.getChannelName()).deleteYn('N').build();
         	chatService.channelSave(creUpdate);
         }
         log.info("전체세션 : " +list.toString());

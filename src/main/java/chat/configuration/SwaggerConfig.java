@@ -29,15 +29,15 @@ public class SwaggerConfig {
     @Bean
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)
-                //.securityContexts(Arrays.asList(securityContext())) // 추가
-                //.securitySchemes(Arrays.asList(apiKey())) // 추가
-                .consumes(getConsumeContentTypes())
-                .produces(getProduceContentTypes())
-                .select()
-                .apis(RequestHandlerSelectors.any())
-                .paths(PathSelectors.any())
-                .build()
-                .apiInfo(apiInfo());
+            //.securityContexts(Arrays.asList(securityContext())) // 추가
+            //.securitySchemes(Arrays.asList(apiKey())) // 추가
+            .consumes(getConsumeContentTypes())
+            .produces(getProduceContentTypes())
+            .select()
+            .apis(RequestHandlerSelectors.any())
+            .paths(PathSelectors.any())
+            .build()
+            .apiInfo(apiInfo());
     }
 
     private Set<String> getConsumeContentTypes(){
@@ -55,18 +55,18 @@ public class SwaggerConfig {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("CHAT API DOCUMENTATION")
-                .description("CHAT API 문서")
-                .version(version)
-                .contact(new Contact("주재범", "", "jaebum7396@naver.com"))
-                .build();
+            .title("CHAT API DOCUMENTATION")
+            .description("CHAT API 문서")
+            .version(version)
+            .contact(new Contact("주재범", "", "jaebum7396@naver.com"))
+            .build();
     }
 
     private SecurityContext securityContext() {
         return SecurityContext.builder()
-                .securityReferences(defaultAuth())
-                .build();
-    }
+            .securityReferences(defaultAuth())
+            .build();
+}
 
     private List<SecurityReference> defaultAuth() {
         AuthorizationScope authorizationScope = new AuthorizationScope("global", "accessEverything");

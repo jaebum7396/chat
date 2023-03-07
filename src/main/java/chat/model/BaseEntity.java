@@ -36,8 +36,8 @@ public abstract class BaseEntity {
 
     @CreatedBy
     @JsonIgnore
-    @Column(name = "INSERT_USER_ID")
-    private Long insertUserId;
+    @Column(name = "INSERT_USER_CD")
+    private Long insertUserCd;
 
     @LastModifiedDate
     @JsonIgnore
@@ -46,21 +46,20 @@ public abstract class BaseEntity {
 
     @LastModifiedBy
     @JsonIgnore
-    @Column(name = "UPDATE_USER_ID")
-    private Long updateUserId;
+    @Column(name = "UPDATE_USER_CD")
+    private Long updateUserCd;
 
-    @ColumnDefault("-1")
     @JsonIgnore
-    @Column(name = "DELETE_YN")
-    protected int deleteYn;
+    @Column(name = "DELETE_YN", length = 1, columnDefinition = "CHAR(1) DEFAULT 'N'")
+    protected char deleteYn;
 
     @JsonIgnore
     @Column(name = "DELETE_DT")
     private LocalDateTime deleteDt;
 
     @JsonIgnore
-    @Column(name = "DELETE_USER_ID")
-    private Long deleteUserId;
+    @Column(name = "DELETE_USER_CD")
+    private Long deleteUserCd;
 
     @JsonIgnore
     @Column(name = "REMARK")
