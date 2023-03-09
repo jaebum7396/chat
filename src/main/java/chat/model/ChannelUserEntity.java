@@ -7,6 +7,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -15,17 +17,18 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+@Getter
+@Setter
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
 @EqualsAndHashCode(callSuper=false)
 @IdClass(ChannelUserId.class)
 @Entity(name = "TB_CHANNEL_USER")
-public class ChannelUserEntity  extends BaseEntity implements Serializable{
-	@Id @Column(nullable = false, name = "CHANNEL_CD")
-	private Long channelCd;
+public class ChannelUserEntity extends BaseEntity implements Serializable{
+	
+	@Id @ManyToOne @JoinColumn(name = "CHANNEL_CD")
+	private ChannelEntity channelEntity;
 	
 	@Id @Column(nullable = false, name = "USER_CD")
 	private Long userCd;
@@ -53,4 +56,8 @@ public class ChannelUserEntity  extends BaseEntity implements Serializable{
     
 	@Column(name = "LAST_MESSAGE_DT")
     private LocalDateTime lastMessageDt;
+	
+	public void setChannelEntity(ChannelEntity channelEntity) {
+        this.channelEntity = channelEntity;
+    }
 }

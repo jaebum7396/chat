@@ -39,43 +39,46 @@ public class ChannelService {
     }
     
     //웹소켓 요청이 왔을때 처리되는 서비스
-    public void handlerActions(WebSocketSession session, MessageEntity messageEntity) {
-        //if (messageEntity.getSendType().equals(MessageEntity.MessageType.ENTER)) {
-            sessions.add(session);
-            channelUserSave( 
-        		ChannelUserEntity.builder()
-        			.channelCd(messageEntity.getChannelCd())
-        			.userCd(messageEntity.getUserCd())
-                    .sessionId(session.getId())
-                    .connectYn('Y')
-                    .build()
-            );
-            messageEntity.setMessage(messageEntity.getUserCd() + "님이 입장했습니다.");
-            sendMessage(messageEntity);
-        //}
+    //public void handlerActions(WebSocketSession session, MessageEntity messageEntity) {
+	public void handlerActions(WebSocketSession session, char connectYn) {
+		if('Y' == connectYn) {
+			sessions.add(session);
+		}else {
+			sessions.remove(session);
+		}
+		log.info("전체세션 : " +sessions.toString());
     }
     
     //메시지 전송 처리 서비스
     public <T> ResponseEntity sendMessage(MessageEntity messageEntity) {
+    	System.out.println(messageEntity.toString());
     	ChannelResponse chatResponse;
     	Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+    	log.info("전체세션 : " +sessions.toString());
+    	
         sessions.parallelStream()
         .forEach(session -> {
         	List<ChannelUserEntity> crme = new ArrayList<ChannelUserEntity>();
+        	//if(!"".equals(messageEntity.getMessageTo())&&messageEntity.getMessageTo()!=null){
+        	//	System.out.println("touserCd != null");
+        	//	crme = channelUserFindByChannelCdAndUserCdAndConnectYn(messageEntity.getChannelCd(), messageEntity.getMessageTo(), 'Y');
+        	//}else {
+        	//	System.out.println("touserCd == null");
+        	//	crme = channelUserFindByChannelCdAndConnectYn(messageEntity.getChannelCd(), 'Y');
+        	//}
         	if(!"".equals(messageEntity.getMessageTo())&&messageEntity.getMessageTo()!=null){
         		System.out.println("touserCd != null");
-        		crme = channelUserFindByChannelCdAnduserCdAndConnectYn(messageEntity.getChannelCd(), messageEntity.getMessageTo(), 'Y');
+        		crme = channelUserFindByChannelCdAndUserCd(ChannelEntity.builder().channelCd(messageEntity.getChannelCd()).build(), messageEntity.getMessageTo());
         	}else {
         		System.out.println("touserCd == null");
-        		crme = channelUserFindByChannelCdAndConnectYn(messageEntity.getChannelCd(), 'Y');
+        		crme = channelUserFindByChannelCd(ChannelEntity.builder().channelCd(messageEntity.getChannelCd()).build());
         	}
-        	if(crme.stream().filter(member -> session.getId().equals(member.getSessionId())).findAny().isPresent()) {
-        		try {
-                    session.sendMessage(new TextMessage(objectMapper.writeValueAsString(messageEntity)));
-                } catch (IOException e) {
-                    log.error(e.getMessage(), e);
-                }
-        	};
+        	
+    		try {
+                session.sendMessage(new TextMessage(objectMapper.writeValueAsString(messageEntity)));
+            } catch (IOException e) {
+                log.error(e.getMessage(), e);
+            }
         });
         //채팅 로그를 저장한다.
         MessageEntity chatEntity = messageRepository.save(messageEntity);
@@ -88,8 +91,6 @@ public class ChannelService {
                 .message("요청 성공")
                 .result(resultMap).build();
         return ResponseEntity.ok().body(chatResponse);
-        
-        //requestClient("http://"+messageEntity.getDomain()+"/chat/socketEndpoint.jsp", chatEntity);
     }
 
     //방을 생성하는 서비스
@@ -131,7 +132,7 @@ public class ChannelService {
         	
         	Object[] channelCdArr = channelUserRepository.findExistingChannelCdWithUserCd(LOGIN_USER_CD, TO_USER_CD);
         	if(channelCdArr.length==0) {
-        		System.out.println("신규 개설 채널입니다 : "+ Long.parseLong(channelCdArr[0].toString()));
+        		System.out.println("신규 개설 채널입니다 ");
         		channelEntity = ChannelEntity.builder().sessionId(randomId).deleteYn('N').build();
         	}else {
         		System.out.println("존재하는 채널 코드입니다 : "+ Long.parseLong(channelCdArr[0].toString()));
@@ -141,8 +142,8 @@ public class ChannelService {
             ChannelEntityArr.add(channelEntity);  
             channelEntity = channelSave(channelEntity);
             
-            channelUserRepository.save(ChannelUserEntity.builder().channelCd(channelEntity.getChannelCd()).userCd(LOGIN_USER_CD).build());
-            channelUserRepository.save(ChannelUserEntity.builder().channelCd(channelEntity.getChannelCd()).userCd(TO_USER_CD).build());
+            channelUserRepository.save(ChannelUserEntity.builder().channelEntity(channelEntity).userCd(LOGIN_USER_CD).build());
+            channelUserRepository.save(ChannelUserEntity.builder().channelEntity(channelEntity).userCd(TO_USER_CD).build());
             
             resultMap.put("channel", channelEntity);
             
@@ -168,7 +169,7 @@ public class ChannelService {
         ChannelResponse chatResponse;
         Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
         try {
-        	resultMap.put("channels",channelFindByDeleteYn('N'));
+        	resultMap.put("channels", channelFindByDeleteYn('N'));
             chatResponse = ChannelResponse.builder()
                     .statusCode(HttpStatus.OK.value())
                     .status(HttpStatus.OK)
@@ -257,62 +258,6 @@ public class ChannelService {
         }	
     }
     
-    //userCd와 ChannelCd를 통해 해당 방의 유저를 퇴장시키는 서비스
-    public ResponseEntity exitChannel(Long userCd, Long channelCd) {
-    	ChannelResponse chatResponse;
-        Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
-        try {
-        	if(channelUserEntityFindById(userCd, channelCd).isPresent()) {
-        		resultMap.put("channelUserEntity", channelUserRepository
-        				.save(ChannelUserEntity.builder().channelCd(channelCd).userCd(userCd).connectYn('N').build()));
-        		chatResponse = ChannelResponse.builder()
-        				.statusCode(HttpStatus.OK.value())
-        				.status(HttpStatus.OK)
-        				.message("요청 성공")
-        				.result(resultMap).build();
-        		return ResponseEntity.ok().body(chatResponse);
-        	}else{
-        		chatResponse = ChannelResponse.builder()
-        				.statusCode(HttpStatus.OK.value())
-        				.status(HttpStatus.OK)
-        				.message("해당 유저정보가 없습니다.")
-        				.result(resultMap).build();
-        		return ResponseEntity.ok().body(chatResponse);
-        	}
-        } catch (Exception e) {
-            e.printStackTrace();
-            chatResponse = ChannelResponse.builder()
-                    .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .message("서버쪽 오류가 발생했습니다. 관리자에게 문의하십시오")
-                    .result(resultMap).build();
-            return ResponseEntity.internalServerError().body(chatResponse);
-        }	
-    }
-    
-    //룸코드를 통해 각 방의 활성멤버들을 찾아 반환하는 서비스
-    public ResponseEntity findActiveMember(Long channelCd) {
-    	ChannelResponse chatResponse;
-        Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
-        try {
-    	 	resultMap.put("chatArr", channelUserFindByChannelCdAndConnectYn(channelCd, 'Y'));
-    		chatResponse = ChannelResponse.builder()
-    				.statusCode(HttpStatus.OK.value())
-    				.status(HttpStatus.OK)
-    				.message("요청 성공")
-    				.result(resultMap).build();
-    		return ResponseEntity.ok().body(chatResponse);
-        } catch (Exception e) {
-            e.printStackTrace();
-            chatResponse = ChannelResponse.builder()
-                    .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .message("서버쪽 오류가 발생했습니다. 관리자에게 문의하십시오")
-                    .result(resultMap).build();
-            return ResponseEntity.internalServerError().body(chatResponse);
-        }
-    }
-    
     public void requestClient(String url, MessageEntity chatEntity) {
     	try {
     		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(url);
@@ -362,6 +307,10 @@ public class ChannelService {
     public List<ChannelEntity> channelFindByDeleteYn(char deleteYn){
     	return channelRepository.findByDeleteYn(deleteYn);
     }
+    //모든 활성 채팅방을 조회하는 메서드
+    //public List<ChannelEntity> channelFindByUserCdAndDeleteYn(Long userCd, char deleteYn){
+    //	return channelRepository.findByUserCdAndDeleteYn(userCd, deleteYn);
+    //}
     
     //[CRUD]channelMember
     
@@ -369,17 +318,21 @@ public class ChannelService {
     public ChannelUserEntity channelUserSave(ChannelUserEntity channelUserEntity) {
     	return channelUserRepository.save(channelUserEntity);
     }
-    //userCd와 ChannelCd를 통해 해당하는 유저를 조회하는 메서드
-    public Optional<ChannelUserEntity> channelUserEntityFindById(Long userCd, Long channelCd) {
-    	return channelUserRepository.findById(ChannelUserId.builder().userCd(userCd).channelCd(channelCd).build());
+    //ChannelCd를 통해 현재 방에 들어와있는 유저를 조회하는 메서드
+    public List<ChannelUserEntity> channelUserFindByChannelCd(ChannelEntity channelCd) {
+    	return channelUserRepository.findByChannelEntity(channelCd);
     }
     //ChannelCd를 통해 현재 방에 들어와있는 유저를 조회하는 메서드
-    public List<ChannelUserEntity> channelUserFindByChannelCdAndConnectYn(Long channelCd, char connectYn) {
-    	return channelUserRepository.findByChannelCdAndConnectYn(channelCd, connectYn);
+    public List<ChannelUserEntity> channelUserFindByChannelCdAndUserCd(ChannelEntity channelCd, Long userCd) {
+    	return channelUserRepository.findByChannelEntityAndUserCd(channelCd, userCd);
     }
     //ChannelCd를 통해 현재 방에 들어와있는 유저를 조회하는 메서드
-    public List<ChannelUserEntity> channelUserFindByChannelCdAnduserCdAndConnectYn(Long channelCd, Long userCd, char connectYn) {
-    	return channelUserRepository.findByChannelCdAndUserCdAndConnectYn(channelCd, userCd, connectYn);
+    public List<ChannelUserEntity> channelUserFindByChannelCdAndConnectYn(ChannelEntity channelCd, char connectYn) {
+    	return channelUserRepository.findByChannelEntityAndConnectYn(channelCd, connectYn);
+    }
+    //ChannelCd를 통해 현재 방에 들어와있는 유저를 조회하는 메서드
+    public List<ChannelUserEntity> channelUserFindByChannelCdAndUserCdAndConnectYn(ChannelEntity channelCd, Long userCd, char connectYn) {
+    	return channelUserRepository.findByChannelEntityAndUserCdAndConnectYn(channelCd, userCd, connectYn);
     }
     //session을 통해 유저를 조회하는 메서드	
     public Optional<ChannelUserEntity> channelUserFindBySession(String session) {

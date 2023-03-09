@@ -8,13 +8,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import chat.model.ChannelEntity;
 import chat.model.ChannelUserEntity;
 import chat.model.ChannelUserId;
 
 @Repository
 public interface ChannelUserRepository extends JpaRepository<ChannelUserEntity, ChannelUserId> {
-	List<ChannelUserEntity> findByChannelCdAndConnectYn(Long ChannelCd, char ConnectYn);
-	List<ChannelUserEntity> findByChannelCdAndUserCdAndConnectYn(Long ChannelCd, Long userCd, char ConnectYn);
+	List<ChannelUserEntity> findByChannelEntity(ChannelEntity channelEntity);
+	List<ChannelUserEntity> findByChannelEntityAndUserCd(ChannelEntity channelEntity, Long userCd);
+	List<ChannelUserEntity> findByChannelEntityAndConnectYn(ChannelEntity channelEntity, char ConnectYn);
+	List<ChannelUserEntity> findByChannelEntityAndUserCdAndConnectYn(ChannelEntity channelEntity, Long userCd, char ConnectYn);
 	Optional<ChannelUserEntity> findBySessionId(String session);
     List<ChannelUserEntity> findAll();
     

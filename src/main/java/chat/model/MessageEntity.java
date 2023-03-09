@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 @Getter
@@ -19,6 +20,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 @Entity(name = "TB_MESSAGE")
 public class MessageEntity  extends BaseEntity {
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "MESSAGE_CD")

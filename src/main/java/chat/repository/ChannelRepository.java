@@ -12,6 +12,7 @@ import chat.model.ChannelEntity;
 public interface ChannelRepository extends JpaRepository<ChannelEntity,String> {
 	ChannelEntity save(ChannelEntity ChannelEntity);
     Optional<ChannelEntity> findByChannelCd(Long ChannelCd);
+    //List<ChannelEntity> findByUserCdAndDeleteYn(Long userCd, char deleteYn);
     List<ChannelEntity> findByDeleteYn(char deleteYn);
     List<ChannelEntity> findAll();
 }

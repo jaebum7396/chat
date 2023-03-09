@@ -42,7 +42,7 @@ public class ChannelController {
 		return chatService.createChannelWithUser(LOGIN_USER_CD, TO_USER_CD);
 	}
 	
-	@ApiOperation(value = "toUser 방 개설", notes = "toUser 방개설")
+	@ApiOperation(value = "메시지전송", notes = "메시지전송")
 	@PostMapping("/sendMessage")
 	@ResponseBody
 	public ResponseEntity sendMessage(@RequestBody MessageEntity messageEntity) {
@@ -63,25 +63,18 @@ public class ChannelController {
 		return chatService.activeMyChannelList();
 	}
 	
-	@ApiOperation(value = "방 퇴장", notes = "")
-	@PostMapping("/exitChannel")
-	@ResponseBody
-	public ResponseEntity exitChannel(@RequestParam Long userCd,@RequestParam Long ChannelCd) {
-		return chatService.exitChannel(userCd,ChannelCd);
-	}
-	
-	@ApiOperation(value = "멤버 조회", notes = "멤버 조회")
-	@GetMapping("/findActiveMember")
-	@ResponseBody
-	public ResponseEntity findActiveMember(@RequestParam Long ChannelCd) {
-		return chatService.findActiveMember(ChannelCd);
-	}
+	//@ApiOperation(value = "방 퇴장", notes = "")
+	//@PostMapping("/exitChannel")
+	//@ResponseBody
+	//public ResponseEntity exitChannel(@RequestParam Long userCd,@RequestParam Long channelCd) {
+	//	return chatService.exitChannel(userCd,channelCd);
+	//}
 	
 	@ApiOperation(value = "해당 방 대화 조회", notes = "해당 방 대화 조회")
 	@GetMapping("/loadChannel")
 	@ResponseBody
-	public ResponseEntity loadChannel(@RequestParam Long ChannelCd) {
-		return chatService.loadChannel(ChannelCd);
+	public ResponseEntity loadChannel(@RequestParam Long channelCd) {
+		return chatService.loadChannel(channelCd);
 	}
 	
 	@GetMapping("/channel_list")
@@ -89,9 +82,9 @@ public class ChannelController {
         return "chat/channel_list";
     }
 	
-	@GetMapping("/channel_detail/{ChannelCd}")
-    public String channelDetail(Model model, @PathVariable Long ChannelCd){
-		model.addAttribute("ChannelCd", ChannelCd);
+	@GetMapping("/channel_detail/{channelCd}")
+    public String channelDetail(Model model, @PathVariable Long channelCd){
+		model.addAttribute("channelCd", channelCd);
         return "chat/channel_detail";
     }
 }
