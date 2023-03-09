@@ -35,9 +35,6 @@ public class ChannelEntity extends BaseEntity {
     @Column(name = "CHANNEL_ORDER")
     private int channelOrder;
     
-    @Column(name = "SESSION_ID")
-    private String sessionId;
-    
     @Column(name = "LAST_MESSAGE_CD")
     private Long lastMessageCd;
     

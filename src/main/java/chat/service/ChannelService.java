@@ -1,12 +1,17 @@
 package chat.service;
 
-import chat.model.*;
-import chat.repository.MessageRepository;
-import chat.repository.ChannelUserRepository;
-import chat.repository.ChannelRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +22,17 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.util.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import chat.model.ChannelEntity;
+import chat.model.ChannelResponse;
+import chat.model.ChannelUserEntity;
+import chat.model.MessageEntity;
+import chat.repository.ChannelRepository;
+import chat.repository.ChannelUserRepository;
+import chat.repository.MessageRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -59,13 +72,6 @@ public class ChannelService {
         sessions.parallelStream()
         .forEach(session -> {
         	List<ChannelUserEntity> crme = new ArrayList<ChannelUserEntity>();
-        	//if(!"".equals(messageEntity.getMessageTo())&&messageEntity.getMessageTo()!=null){
-        	//	System.out.println("touserCd != null");
-        	//	crme = channelUserFindByChannelCdAndUserCdAndConnectYn(messageEntity.getChannelCd(), messageEntity.getMessageTo(), 'Y');
-        	//}else {
-        	//	System.out.println("touserCd == null");
-        	//	crme = channelUserFindByChannelCdAndConnectYn(messageEntity.getChannelCd(), 'Y');
-        	//}
         	if(!"".equals(messageEntity.getMessageTo())&&messageEntity.getMessageTo()!=null){
         		System.out.println("touserCd != null");
         		crme = channelUserFindByChannelCdAndUserCd(ChannelEntity.builder().channelCd(messageEntity.getChannelCd()).build(), messageEntity.getMessageTo());
@@ -99,7 +105,7 @@ public class ChannelService {
         Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
         try {
             String randomId = UUID.randomUUID().toString();
-            ChannelEntity channelEntity = ChannelEntity.builder().channelName(channelName).sessionId(randomId).deleteYn('N').build();
+            ChannelEntity channelEntity = ChannelEntity.builder().channelName(channelName).deleteYn('N').build();
             ChannelEntityArr.add(channelEntity);  
             channelSave(channelEntity);
             
@@ -123,27 +129,27 @@ public class ChannelService {
     }
     
     //방을 생성하는 서비스
-    public ResponseEntity createChannelWithUser(Long LOGIN_USER_CD, Long TO_USER_CD) {
+    public ResponseEntity createChannelWithUser(Long loginUserCd, Long toUserCd) {
         ChannelResponse chatResponse;
         Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
         try {
         	String randomId = UUID.randomUUID().toString();
         	ChannelEntity channelEntity;
         	
-        	Object[] channelCdArr = channelUserRepository.findExistingChannelCdWithUserCd(LOGIN_USER_CD, TO_USER_CD);
+        	Object[] channelCdArr = channelUserRepository.findExistingChannelCdWithUserCd(loginUserCd, toUserCd);
         	if(channelCdArr.length==0) {
         		System.out.println("신규 개설 채널입니다 ");
-        		channelEntity = ChannelEntity.builder().sessionId(randomId).deleteYn('N').build();
+        		channelEntity = ChannelEntity.builder().deleteYn('N').build();
+        		
         	}else {
         		System.out.println("존재하는 채널 코드입니다 : "+ Long.parseLong(channelCdArr[0].toString()));
-        		channelEntity = ChannelEntity.builder().channelCd(Long.parseLong(channelCdArr[0].toString())).sessionId(randomId).deleteYn('N').build();
+        		channelEntity = ChannelEntity.builder().channelCd(Long.parseLong(channelCdArr[0].toString())).deleteYn('N').build();
         	}
         	
             ChannelEntityArr.add(channelEntity);  
+            channelEntity.addChannelUser(ChannelUserEntity.builder().channelEntity(channelEntity).userCd(loginUserCd).build());
+            channelEntity.addChannelUser(ChannelUserEntity.builder().channelEntity(channelEntity).userCd(toUserCd).build());
             channelEntity = channelSave(channelEntity);
-            
-            channelUserRepository.save(ChannelUserEntity.builder().channelEntity(channelEntity).userCd(LOGIN_USER_CD).build());
-            channelUserRepository.save(ChannelUserEntity.builder().channelEntity(channelEntity).userCd(TO_USER_CD).build());
             
             resultMap.put("channel", channelEntity);
             
@@ -165,11 +171,11 @@ public class ChannelService {
     }
     
     //모든 활성화된 방 리스트를 조회하는 서비스
-    public ResponseEntity activeMyChannelList() {
+    public ResponseEntity activeMyChannelList(Long loginUserCd) {
         ChannelResponse chatResponse;
         Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
         try {
-        	resultMap.put("channels", channelFindByDeleteYn('N'));
+        	resultMap.put("channels", channelUserRepository.findByUserCd(loginUserCd));
             chatResponse = ChannelResponse.builder()
                     .statusCode(HttpStatus.OK.value())
                     .status(HttpStatus.OK)

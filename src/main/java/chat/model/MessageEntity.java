@@ -35,21 +35,24 @@ public class MessageEntity  extends BaseEntity {
 	@Column(name = "SEND_TYPE")
 	private String sendType;
 	
+	@Column(name = "TRANSFER_TYPE")
+	private int transferType;
+	
 	@Column(name = "MESSAGE_TYPE")
-	private String messageType;
+	private int messageType;
 
+	@Column(name = "MESSAGE_DT")
+	private LocalDateTime messageDt;
+	
 	@Column(name = "MESSAGE")
 	private String message;
 
 	@Column(name = "MESSAGE_TO")
 	private Long messageTo;
 
-	@Column(name = "MESSAGE_DT")
-	private LocalDateTime messageDt;
+	@Column(name = "LINK_MESSAGE_CD")
+	private Long linkMessageCd;
 
 	@Column(name = "UNREAD_COUNT")
     private int unreadCount;
-	
-	@Column(name = "LINK_MESSAGE_CD")
-	private Long linkMessageCd;
 }

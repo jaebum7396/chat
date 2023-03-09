@@ -21,13 +21,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-@EntityListeners(AuditingEntityListener.class)
-@SuperBuilder
 @Getter
 @Setter
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 @MappedSuperclass
+@EntityListeners(AuditingEntityListener.class)
 public abstract class BaseEntity {
     @CreatedDate
     @Column(nullable = false, updatable = false, name = "INSERT_DT")
@@ -62,6 +62,6 @@ public abstract class BaseEntity {
     private Long deleteUserCd;
 
     @JsonIgnore
-    @Column(name = "REMARK")
-    private String remark;
+    @Column(name = "DELETE_REMARK")
+    private String deleteRemark;
 }

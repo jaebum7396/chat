@@ -55,11 +55,12 @@ body {
 	height: 69px;
 	width: 100%;
 	border-bottom: 1px solid #d8dfe3;
+	display:flex;
+	justify-content:space-around;
 }
 
 #topmenu span {
 	float: left;
-	width: 33.333%;
 	height: 70px;
 	/* background:
 				url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/245657/top-menu.png")

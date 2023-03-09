@@ -5,10 +5,16 @@ import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -22,12 +28,13 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 @EqualsAndHashCode(callSuper=false)
 @IdClass(ChannelUserId.class)
 @Entity(name = "TB_CHANNEL_USER")
 public class ChannelUserEntity extends BaseEntity implements Serializable{
 	
-	@Id @ManyToOne @JoinColumn(name = "CHANNEL_CD")
+	@Id @ManyToOne @JoinColumn(name = "CHANNEL_CD") @JsonIgnore
 	private ChannelEntity channelEntity;
 	
 	@Id @Column(nullable = false, name = "USER_CD")
@@ -36,7 +43,7 @@ public class ChannelUserEntity extends BaseEntity implements Serializable{
 	@Column(name = "CHANNEL_ALIAS")
     private String channelAlias;
 	
-	@Column(name = "JOIN_DT")
+	@Column(name = "JOIN_DT") @CreatedDate
     private LocalDateTime joinDt;
 	
 	@Column(name = "CONNECT_YN", length = 1, columnDefinition = "CHAR(1) DEFAULT 'N'")

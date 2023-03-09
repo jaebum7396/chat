@@ -38,8 +38,8 @@ public class ChannelController {
 	@ApiOperation(value = "toUser 방 개설", notes = "toUser 방개설")
 	@PostMapping("/createChannelWithUser")
 	@ResponseBody
-	public ResponseEntity createChannelWithUser(@RequestParam Long LOGIN_USER_CD, @RequestParam Long TO_USER_CD) {
-		return chatService.createChannelWithUser(LOGIN_USER_CD, TO_USER_CD);
+	public ResponseEntity createChannelWithUser(@RequestParam Long loginUserCd, @RequestParam Long toUserCd) {
+		return chatService.createChannelWithUser(loginUserCd, toUserCd);
 	}
 	
 	@ApiOperation(value = "메시지전송", notes = "메시지전송")
@@ -47,6 +47,13 @@ public class ChannelController {
 	@ResponseBody
 	public ResponseEntity sendMessage(@RequestBody MessageEntity messageEntity) {
 		return chatService.sendMessage(messageEntity);
+	}
+	
+	@ApiOperation(value = "해당 방 대화 조회", notes = "해당 방 대화 조회")
+	@GetMapping("/loadChannel")
+	@ResponseBody
+	public ResponseEntity loadChannel(@RequestParam Long channelCd) {
+		return chatService.loadChannel(channelCd);
 	}
 
 	@ApiOperation(value = "모든 방 조회", notes = "모든 방 조회")
@@ -56,11 +63,11 @@ public class ChannelController {
 		return chatService.activeChannelList();
 	}
 	
-	@ApiOperation(value = "모든 방 조회", notes = "모든 방 조회")
+	@ApiOperation(value = "나의 활성 채널 조회", notes = "나의 활성 채널 조회")
 	@GetMapping("/activeMyChannelList")
 	@ResponseBody
-	public ResponseEntity activeMyChannelList() {
-		return chatService.activeMyChannelList();
+	public ResponseEntity activeMyChannelList(@RequestParam Long loginUserCd) {
+		return chatService.activeMyChannelList(loginUserCd);
 	}
 	
 	//@ApiOperation(value = "방 퇴장", notes = "")
@@ -69,13 +76,6 @@ public class ChannelController {
 	//public ResponseEntity exitChannel(@RequestParam Long userCd,@RequestParam Long channelCd) {
 	//	return chatService.exitChannel(userCd,channelCd);
 	//}
-	
-	@ApiOperation(value = "해당 방 대화 조회", notes = "해당 방 대화 조회")
-	@GetMapping("/loadChannel")
-	@ResponseBody
-	public ResponseEntity loadChannel(@RequestParam Long channelCd) {
-		return chatService.loadChannel(channelCd);
-	}
 	
 	@GetMapping("/channel_list")
     public String channelList(){

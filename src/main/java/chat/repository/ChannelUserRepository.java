@@ -18,6 +18,8 @@ public interface ChannelUserRepository extends JpaRepository<ChannelUserEntity, 
 	List<ChannelUserEntity> findByChannelEntityAndUserCd(ChannelEntity channelEntity, Long userCd);
 	List<ChannelUserEntity> findByChannelEntityAndConnectYn(ChannelEntity channelEntity, char ConnectYn);
 	List<ChannelUserEntity> findByChannelEntityAndUserCdAndConnectYn(ChannelEntity channelEntity, Long userCd, char ConnectYn);
+	
+	List<ChannelUserEntity> findByUserCd(Long UserCd);
 	Optional<ChannelUserEntity> findBySessionId(String session);
     List<ChannelUserEntity> findAll();
     
@@ -27,9 +29,9 @@ public interface ChannelUserRepository extends JpaRepository<ChannelUserEntity, 
     	"FROM TB_CHANNEL_USER tcu " + 
     	"GROUP BY CHANNEL_CD " + 
     	"HAVING COUNT(CHANNEL_CD) = 2 " +
-    	"AND INSTR(group_concat(USER_CD), :LOGIN_USER_CD) " +
-    	"AND INSTR(group_concat(USER_CD), :TO_USER_CD) " 
+    	"AND INSTR(group_concat(USER_CD), :loginUserCd) " +
+    	"AND INSTR(group_concat(USER_CD), :toUserCd) " 
     	, nativeQuery = true
 	)
-    Object[] findExistingChannelCdWithUserCd(@Param("LOGIN_USER_CD") Long LOGIN_USER_CD, @Param("TO_USER_CD") Long TO_USER_CD);
+    Object[] findExistingChannelCdWithUserCd(@Param("loginUserCd") Long loginUserCd, @Param("toUserCd") Long toUserCd);
 }
